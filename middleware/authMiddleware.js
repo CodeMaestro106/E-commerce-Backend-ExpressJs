@@ -19,8 +19,6 @@ const authenticate = (req, res, next) => {
 // Authorization middleware
 const authorize = (roles = []) => {
   return (req, res, next) => {
-    console.log(roles);
-    console.log(req.user.role);
 
     if (roles.length && !roles.includes(req.user.role)) {
       return res.status(403).send('Permission denied.');
