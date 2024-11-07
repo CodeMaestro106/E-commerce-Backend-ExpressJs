@@ -7,6 +7,10 @@ const config = require('../config/config');
 // Register a new user
 const register = async (req, res) => {
   const { username, password, role } = req.body;
+
+//
+
+
   console.log(req.body);
   const hashedPassword = await bcrypt.hash(password, 10);
   const userRole = await Role.findOne({ where: { name: role } });
