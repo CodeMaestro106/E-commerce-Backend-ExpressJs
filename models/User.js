@@ -6,10 +6,19 @@ class User extends Model {}
 
 User.init(
     {
+        email: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: {
+                msg: "Email must be unique"
+            },
+        },
         username: {
             type: DataTypes.STRING,
             allowNull: false,
-            unique: true,
+            unique: {
+                msg: "Username must be unique"
+            }
         },
         password: {
             type: DataTypes.STRING,
@@ -37,7 +46,6 @@ User.init(
         tableName: 'users' // Optional: You can specify the table name
     }
 )
-
 
 User.belongsTo(Role, { foreignKey: 'roleId' });
 

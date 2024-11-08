@@ -1,12 +1,26 @@
 // server.js
 const express = require('express');
 const cors = require('cors');
+
+// set init information
 require('dotenv').config();
+
+// db setting
 const { connectDB } = require('./config/database');
+
+
+// route setting
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+
+// model setting
 const User = require('./models/User');
 const Role = require('./models/Role');
+
+// insert utils such as role initialize
+const initializeRoles = require('./utils/initRoles');
+const initializeAdminUsers = require('./utils/initAdminUser');
+
 
 const app = express();
 app.use(cors());
@@ -21,6 +35,9 @@ connectDB();
 User.sync();
 Role.sync();
 
+// init role with "ADMIN" and "USER"
+initializeRoles();
+initializeAdminUsers();
 
 // Routes
 app.use('/auth', authRoutes);

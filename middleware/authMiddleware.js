@@ -4,15 +4,20 @@ const config = require('../config/config');
 
 // Authentication middleware
 const authenticate = (req, res, next) => {
-  const token = req.header('Authorization');
-  if (!token) return res.status(403).send('Access denied.');
 
+  // get token from request info
+  const token = req.header('Authorization')?.split(' ')[1];
+  // if token is empty, return 403 error
+  if (!token) {
+    return res.status(403).send({error:'Access denied.'});
+  }
   try {
+    // decoded token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded;
     next();
   } catch (error) {
-    res.status(400).send('Invalid token.');
+    res.status(400).send({msg:'Invalid token.', error: error});
   }
 };
 
