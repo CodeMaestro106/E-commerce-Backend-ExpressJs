@@ -1,8 +1,7 @@
 module.exports = {
     roles: {
-      admin: 'admin',
-      user: 'user',
-      guest: 'guest'
+      admin: 'ADMIN',
+      user: 'USER'
     }
   };
   
