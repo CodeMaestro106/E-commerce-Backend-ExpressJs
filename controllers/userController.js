@@ -2,59 +2,83 @@ const User = require('../models/User');
 const Role = require('../models/Role');
 
 const bcrypt = require('bcryptjs');
-const { where } = require('sequelize');
+
 
 // Get user info
 const getUserInfo = async (req, res) => {
+
   const user = await User.findByPk(req.user.id, {
     include: [{ model: Role }]
   });
-  return res.json(user);
-};
 
-// Get all users (Admin only)
-const getAllUsers = async (req, res) => {
-  const users = await User.findAll({
-    include: [{ model: Role }]
-  });
-  return res.json(users);
+  // Destructuring to extract username, Role.name, and email using spread operator
+  const { username, email, Role: { name: roleName } } = user.dataValues;
+
+  return res.status(200).send({ username: username, email: email, roleName: roleName});
 };
 
 // Update user info by user
 const updateUserInfo = async (req, res) => {
 
-  console.log("user=>",re.user.id);
   const { username, password, newPassword } = req.body;
+
+  console.log(username);
+  console.log(req.user.id);
+  // find user by id
   const user = await User.findByPk(req.user.id);
 
-  const isMatch = await bcrypt.compare(password, user.password);
-  console.log(isMatch);
-  console.log(user.password);
-  console.log(password);
-  
-  if(!isMatch){
-    return res.status(400).send("Password valid");
+  if (!user) {
+    return res.status(404).send({error:'User not found.'});
   }
+
+  // Compare the old password with the stored password
+  const isMatch = await bcrypt.compare(password, user.password);
+  if(!isMatch){
+    return res.status(400).send({error:"Password is incorrect"});
+  }
+
   try{
-    if (username) user.username = username;
-    if (password) user.password = await bcrypt.hash(newPassword, 10);
-  
+    // Update username if provided
+    if (username) {
+      user.username = username;
+    }
+
+    // Update password if a new password is provided
+    if (newPassword) {
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+
     await user.save();
-    return res.json(user);
+    return res.status(200).send({email:user.email, username: user.username});
+
   }catch(error){
-    return res.status(500).send({msg:"server error", error: error});
+    return res.status(500).send({msg:"server can not response"});
   }
   
 };
 
 
+//#region Admin
+
+// Get all users (Admin only)
+const getAllUsers = async (req, res) => {
+  
+  const users = await User.findAll({
+    include: [{ model: Role }]
+  });
+  // send client with email, username, role.name
+  // Destructuring to extract username, Role.name, and email using spread operator and map function
+  const extractedData = users
+        .filter(user => user.Role.name !== 'ADMIN') //Exclude 'ADMIN' role
+        .map( ({id, username, email, Role:{name}}) => ( { id, username, email, roleName:name}));
+
+  return res.status(200).send(extractedData);
+
+};
 
 // Update user info by admin
 const updateUserInfoByAdmin = async (req, res) => {
   
-  // Destructure input from request body
-  const {username, password, role} = req.body;
-
   // Find the user by username
   const user = await User.findByPk(req.params.id)
 
@@ -63,27 +87,18 @@ const updateUserInfoByAdmin = async (req, res) => {
   }
 
   try {
+    // Destructure input from request body
+    const {username} = req.body;
+
     //Update the user if username is provided
-    if (username) user.username = username;
-    
-    //Update the password if provided, hashing it
-    if(password) user.password = await bcrypt.hash(password, 10);
-
-    // Update the role if provided
-    if(role) {
-      const newRole = await Role.findOne({where: {name: role}});
-
-      // Check if the role exists
-      if(newRole){
-        user.roleId = newRole.id;
-      }else{
-        return res.status(400).send({msg: "Role not found"});
-      }
+    if (username) {
+      user.username = username;
     }
 
     // save the update user to the database
     await user.save();
-    return res.json(user);
+    const {id, email, username: sendUsername } = user.dataValues;
+    return res.status(200).send({id:id, email:email, username:sendUsername});
 
   }catch(error){
     res.status(500).send({msg:"Server Error", error: error.message});
@@ -91,15 +106,24 @@ const updateUserInfoByAdmin = async (req, res) => {
   
 };
 
-// Admin can delete user
+// Delete user by Admin
 const deleteUser = async (req, res) => {
 
   // find user by req.params.id
   const user = await User.findByPk(req.params.id);
-  if (!user) return res.status(404).send('User not found.');
-
-  await user.destroy();
-  return res.status(204).send('User deleted');
+  
+  if (!user) {
+    return res.status(404).send({msg:'User not found.'});
+  }
+  try{
+    // delete user by req.params.id
+    await user.destroy();
+    
+    return res.status(204).send('User deleted');
+  }catch(error){
+    return res.status(500).send({msg:error});
+  }
+  
 };
 
 module.exports = { getUserInfo, getAllUsers, updateUserInfo, updateUserInfoByAdmin, deleteUser };
