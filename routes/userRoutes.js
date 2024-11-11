@@ -12,5 +12,5 @@ router.put('/info', authenticate, updateUserInfo);
 router.get('/all-users', authenticate, authorize([config.roles.admin]), getAllUsers);
 router.put('/all-users/:id', authenticate, authorize([config.roles.admin]), updateUserInfoByAdmin);
 router.delete('/all-users/:id', authenticate, authorize([config.roles.admin]), deleteUser);
-
+    
 module.exports = router;
