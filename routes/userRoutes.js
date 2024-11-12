@@ -10,7 +10,9 @@ router.put('/info', authenticate, updateUserInfo);
 
 // Admin routes
 router.get('/all-users', authenticate, authorize([config.roles.admin]), getAllUsers);
-router.put('/all-users/:id', authenticate, authorize([config.roles.admin]), updateUserInfoByAdmin);
-router.delete('/all-users/:id', authenticate, authorize([config.roles.admin]), deleteUser);
 
+router.route('/all-users/:id')
+    .put(authenticate, authorize([config.roles.admin]), updateUserInfoByAdmin)
+    .delete(authenticate, authorize([config.roles.admin]), deleteUser);
+    
 module.exports = router;
