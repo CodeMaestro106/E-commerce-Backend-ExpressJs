@@ -36,8 +36,9 @@ const getProduct = async (req, res) => {
 
 // Create new Product by admin
 const createProduct = async (req, res) => {
-    let imgUrl = req.file ? req.file.path : null;
+    
     try {
+        let imgUrl = req.file ? req.file.path : null;
         const { name, price, description, category } = req.body;
 
         // check if Product already exists

@@ -11,7 +11,7 @@ Product.init(
             allowNull: false,
         },
         price: {
-            type: DataTypes.DOUBLE,
+            type: DataTypes.DECIMAL(10, 2),
             allowNull: false
         },
         description: {
