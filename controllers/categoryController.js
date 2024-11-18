@@ -66,9 +66,10 @@ const updateCategory = async (req, res) => {
             })
         }
 
-        // update the category's name (if necessary)
-        category.name = name;
-        await category.save();
+        // update the Product's info (if necessary)
+        await category.update({
+            name : name,
+        });
 
         return res.status(200).send({
             msg: 'update category successfully',

@@ -18,11 +18,6 @@ Cart.init(
     status: {
         type: DataTypes.STRING,
         defaultValue: 'pending',
-    },
-    totalPrice: {
-        type: DataTypes.DECIMAL(10, 2),
-        defaultValue: 0,
-        allowNull: false,
     }
   },
   {

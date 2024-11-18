@@ -27,11 +27,7 @@ CartItem.init(
     quantity: {
         type: DataTypes.INTEGER,
         defaultValue: 1,
-    },
-    total: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-    },
+    }
   },
   {
     sequelize,
