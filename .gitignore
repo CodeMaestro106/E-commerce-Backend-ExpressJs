@@ -9,6 +9,7 @@ node_modules/
 
 secret
 secret.pub
+uploads/
 
 # Ignore build directories
 dist/
