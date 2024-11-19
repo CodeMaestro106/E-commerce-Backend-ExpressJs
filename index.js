@@ -16,6 +16,10 @@ const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const favoriteRoutes = require("./routes/favoriteRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+
+//payment
+const paymentRoutes = require("./routes/paymentRoutes");
+
 // model setting
 const User = require("./models/User");
 const Role = require("./models/Role");
@@ -33,7 +37,24 @@ const initializeAdminUsers = require("./utils/initAdminUser");
 
 const app = express();
 
-app.use(cors());
+// app.use(
+//   express.json({
+//     // We need the raw body to verify webhook signatures.
+//     // Let's compute it only when hitting the Stripe webhook endpoint.
+//     verify: function (req, res, buf) {
+//       if (req.originalUrl.startsWith("/webhook")) {
+//         req.rawBody = buf.toString();
+//       }
+//     },
+//   })
+// );
+
+// app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -53,6 +74,9 @@ app.use("/favorite", favoriteRoutes);
 
 // order route
 app.use("/order", orderRoutes);
+
+// payment route
+app.use("/pay", paymentRoutes);
 
 const startServer = async () => {
   try {
