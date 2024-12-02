@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer');
 
 const crypto = require('crypto');
 const { roles } = require('../config/config');
+const { error } = require('console');
 
 // Register a new user
 const register = async (req, res) => {
@@ -162,6 +163,10 @@ const refreshToken = async (req, res) => {
   try {
     console.log('refresh - token => ', req.body.refreshToken);
     const requestRefreshToken = req.body.refreshToken;
+
+    if (!requestRefreshToken) {
+      return res.status(400).send({ error: 'Refresh token is required' });
+    }
     const user = await User.findOne({
       where: { refreshToken: requestRefreshToken },
       include: { model: Role },
@@ -170,6 +175,7 @@ const refreshToken = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'user not found' });
     }
+
     const tokenInfo = {
       id: user.id,
       role: user.Role.name,
@@ -191,7 +197,7 @@ const refreshToken = async (req, res) => {
 
 // access and refresh token
 function generateAccessToken(user) {
-  return jwt.sign(user, process.env.JWT_ACCESS_SECRET, { expiresIn: '3h' });
+  return jwt.sign(user, process.env.JWT_ACCESS_SECRET, { expiresIn: '10s' });
 }
 
 function generateRefreshToken(user) {

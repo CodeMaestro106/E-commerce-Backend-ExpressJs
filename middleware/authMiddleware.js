@@ -9,7 +9,7 @@ const authenticate = (req, res, next) => {
 
   // if token is empty, return 403 error
   if (!token) {
-    return res.status(403).send({ error: 'Access denied.' });
+    return res.status(401).send({ error: 'Access denied.' });
   }
   try {
     // decoded token
@@ -19,7 +19,7 @@ const authenticate = (req, res, next) => {
     next();
   } catch (error) {
     console.log('erro =>', error);
-    res.status(400).send({ msg: 'Invalid token.', error: error });
+    res.status(401).send({ msg: 'Invalid token.', error: error });
   }
 };
 
