@@ -197,7 +197,7 @@ const refreshToken = async (req, res) => {
 
 // access and refresh token
 function generateAccessToken(user) {
-  return jwt.sign(user, process.env.JWT_ACCESS_SECRET, { expiresIn: '10s' });
+  return jwt.sign(user, process.env.JWT_ACCESS_SECRET, { expiresIn: '1h' });
 }
 
 function generateRefreshToken(user) {
