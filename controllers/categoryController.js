@@ -1,7 +1,7 @@
-const { where } = require("sequelize");
-const Category = require("../models/Category");
+const { where } = require('sequelize');
+const Category = require('../models/Category');
 
-const bcrypt = require("bcryptjs");
+const bcrypt = require('bcryptjs');
 
 const getCategory = async (req, res) => {
   try {
@@ -27,7 +27,7 @@ const createCategory = async (req, res) => {
     const { name } = req.body;
 
     if (!name) {
-      res.status(400).send({ msg: "Name is required" });
+      res.status(400).send({ msg: 'Name is required' });
     }
 
     // check if category already exists
@@ -36,7 +36,7 @@ const createCategory = async (req, res) => {
     });
     // If category exists, return an error message
     if (category) {
-      return res.status(400).send({ msg: "Category already exists" });
+      return res.status(400).send({ msg: 'Category already exists' });
     }
 
     category = new Category({
@@ -46,13 +46,10 @@ const createCategory = async (req, res) => {
     await category.save();
 
     // Return success response
-    res.status(201).send({
-      msg: "new category created",
-      category: category,
-    });
+    res.status(201).send(category);
   } catch (error) {
     // Return error response
-    return res.status(500).send({ error: "Can not create category" });
+    return res.status(500).send({ error: 'Can not create category' });
   }
 };
 
@@ -60,14 +57,14 @@ const createCategory = async (req, res) => {
 const updateCategory = async (req, res) => {
   try {
     const { name } = req.body;
-
+    console.log(name);
     // Check if category already exists
     let category = await Category.findByPk(req.params.id);
 
     // If category does not exist, return an error message
     if (!category) {
       return res.status(404).send({
-        msg: "category not found",
+        msg: 'category not found',
       });
     }
 
@@ -76,10 +73,7 @@ const updateCategory = async (req, res) => {
       name: name,
     });
 
-    return res.status(200).send({
-      msg: "update category successfully",
-      category: category,
-    });
+    return res.status(200).send(category);
   } catch (error) {
     return res.status(500).send({
       msg: error.message,
@@ -96,16 +90,14 @@ const deleteCategory = async (req, res) => {
     // If category does not exist, return an error message
     if (!category) {
       return res.status(404).send({
-        msg: "category not found",
+        msg: 'category not found',
       });
     }
 
     // delete category if necessary
     await category.destroy();
 
-    return res
-      .status(200)
-      .send({ msg: "category has been deleted successfully" });
+    return res.status(200).send({ id: category.id });
   } catch (error) {
     return res.status(500).send({
       msg: error.message,

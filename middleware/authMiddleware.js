@@ -15,7 +15,7 @@ const authenticate = (req, res, next) => {
     // decoded token
     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
     req.user = decoded;
-    console.log('authenticate', req.user);
+
     next();
   } catch (error) {
     console.log('erro =>', error);

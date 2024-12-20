@@ -52,7 +52,7 @@ const register = async (req, res) => {
 
     return res.status(201).send({ msg: 'User registered', user: sendUser });
   } catch (error) {
-    res.status(500).json({ errors: 'Internal server error' });
+    res.status(500).json({ msg: 'Internal server error' });
   }
 };
 
@@ -79,13 +79,13 @@ const login = async (req, res) => {
 
     // check user is not
     if (!user) {
-      return res.status(400).send({ error: 'User is not registered' });
+      return res.status(400).send({ msg: 'User is not registered' });
     }
 
     // check password is correct
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).send({ error: 'Password is not correct' });
+      return res.status(400).send({ msg: 'Password is not correct' });
     }
 
     // Generate OTP
@@ -165,7 +165,7 @@ const refreshToken = async (req, res) => {
     const requestRefreshToken = req.body.refreshToken;
 
     if (!requestRefreshToken) {
-      return res.status(400).send({ error: 'Refresh token is required' });
+      return res.status(400).send({ msg: 'Refresh token is required' });
     }
     const user = await User.findOne({
       where: { refreshToken: requestRefreshToken },
@@ -173,7 +173,7 @@ const refreshToken = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'user not found' });
+      return res.status(404).json({ msg: 'user not found' });
     }
 
     const tokenInfo = {
@@ -197,11 +197,11 @@ const refreshToken = async (req, res) => {
 
 // access and refresh token
 function generateAccessToken(user) {
-  return jwt.sign(user, process.env.JWT_ACCESS_SECRET, { expiresIn: '1h' });
+  return jwt.sign(user, process.env.JWT_ACCESS_SECRET, { expiresIn: '20h' });
 }
 
 function generateRefreshToken(user) {
-  return jwt.sign(user, process.env.JWT_REFRESH_SECRET, { expiresIn: '15h' });
+  return jwt.sign(user, process.env.JWT_REFRESH_SECRET, { expiresIn: '3d' });
 }
 
 module.exports = { register, login, logout, verifyOtp, refreshToken };

@@ -119,7 +119,7 @@ const deleteUser = async (req, res) => {
     // delete user by req.params.id
     await user.destroy();
 
-    return res.status(204).send('User deleted');
+    return res.status(204).send({ msg: 'user deleted successfully' });
   } catch (error) {
     return res.status(500).send({ msg: error });
   }

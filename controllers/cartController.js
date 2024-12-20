@@ -197,7 +197,7 @@ const deleteProductInCart = async (req, res) => {
     // Delete the product from the cart
     await cartItem.destroy();
 
-    return res.status(200).jsong({ result: true });
+    return res.status(200).json({ result: true });
   } catch (error) {
     return res
       .status(500)
@@ -242,7 +242,15 @@ const getAllCartInfo = async (req, res) => {
   try {
     const cart = await Cart.findAll({
       include: [
-        { model: User }, // Include CartItems
+        { model: User }, // Include User
+        {
+          model: CartItem, // Include CartItems
+          include: [
+            {
+              model: Product, // Include Product model for each CartItem
+            },
+          ],
+        },
       ],
     });
 
@@ -252,6 +260,7 @@ const getAllCartInfo = async (req, res) => {
         error: 'Cart not found',
       });
     }
+
     return res.status(200).send(cart);
   } catch (errors) {
     res.status(500).send({ msg: 'server error', error: errors.message });
