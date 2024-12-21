@@ -1,6 +1,7 @@
 const { where } = require('sequelize');
 const Favorite = require('../models/Favorite');
 const Product = require('../models/Product');
+const { transFormSendProduct } = require('../services/prodcutService');
 
 // Get All favorite product info
 const getFavorite = async (req, res) => {
@@ -16,8 +17,17 @@ const getFavorite = async (req, res) => {
       return res.status(404).send({ msg: 'No favorites found' });
     }
 
-    const products = favorites.map((item) => item.Product);
-    return res.status(200).send(products);
+    const sendProducts = [];
+
+    for (const item of favorites) {
+      console.log(item.Product.stripe_product_id);
+      const product = await transFormSendProduct(
+        item.Product.stripe_product_id,
+      );
+      sendProducts.push(product);
+    }
+
+    return res.status(200).send(sendProducts);
   } catch (error) {
     return res.status(500).send({ error: error.message });
   }
@@ -47,13 +57,22 @@ const addProductToFavorite = async (req, res) => {
         .send({ msg: 'Product is already in your favorites' });
     }
 
+    // console.log(favorite);
+
     await Favorite.create({ userId, productId });
 
-    const product = await Product.findByPk(productId);
-    console.log('add product id', product.dataValues);
+    // const product = await Product.findByPk(productId);
+    // console.log('add product id', product.dataValues);
     // Return success response
-    res.status(201).send({ product: product.dataValues });
+
+    const product = await Product.findByPk(productId);
+    const stripe_product_id = product.stripe_product_id;
+
+    const sendStripeProduct = await transFormSendProduct(stripe_product_id);
+
+    res.status(201).send(sendStripeProduct);
   } catch (error) {
+    console.log('add favorite error', error.message);
     // Return error response
     return res.status(500).send({ error: 'Can not create favorites' });
   }

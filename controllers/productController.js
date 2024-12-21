@@ -173,101 +173,19 @@ const fs = require('fs');
 //   }
 // };
 
+const {
+  transFormProject,
+  transFormSendProduct,
+  convertImgUrl,
+} = require('../services/prodcutService');
+
+const {
+  getPrice,
+  updateProductPrice,
+  deactivatePricesForProduct,
+} = require('../services/priceService');
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
-// Create, Update, Price Object
-// Step 1: Create a new price
-const createNewPrice = async (productId, newUnitAmount) => {
-  try {
-    const price = await stripe.prices.create({
-      unit_amount: newUnitAmount * 100, // Price in cents
-      currency: 'usd', // Replace with your desired currency
-      product: productId,
-    });
-    console.log('New price created:', price);
-    return price;
-  } catch (error) {
-    console.error('Error creating new price:', error);
-    throw error;
-  }
-};
-
-// getPriceObject
-const getPrice = async (productId) => {
-  try {
-    // Fetch all prices for the product
-    const prices = await stripe.prices.list({ product: productId });
-    return prices.data[0];
-  } catch (error) {
-    console.error('Error creating new price:', error);
-    throw error;
-  }
-};
-
-// Step 2: Deactivate the old price (optional)
-const deactivateOldPrice = async (priceId) => {
-  try {
-    const updatedPrice = await stripe.prices.update(priceId, {
-      active: false,
-    });
-    console.log('Old price deactivated:', updatedPrice);
-    return updatedPrice;
-  } catch (error) {
-    console.error('Error deactivating old price:', error);
-    throw error;
-  }
-};
-
-const deactivatePricesForProduct = async (productId) => {
-  try {
-    // Fetch all prices for the product
-    const prices = await stripe.prices.list({ product: productId });
-
-    // Deactivate each price
-    for (const price of prices.data) {
-      await stripe.prices.update(price.id, { active: false });
-      console.log(`Deactivated price: ${price.id}`);
-    }
-  } catch (error) {
-    console.error('Error deactivating prices:', error);
-    throw error;
-  }
-};
-
-// Step 3: Update workflow
-const updateProductPrice = async (productId, oldPriceId, newPrice) => {
-  const newPriceObj = await createNewPrice(productId, newPrice);
-  if (oldPriceId) {
-    await deactivateOldPrice(oldPriceId);
-  }
-  return newPriceObj;
-};
-
-const transFormProject = (product, category, priceObject) => {
-  try {
-    const sendProduct = {
-      id: product.id,
-      name: product.name,
-      price: priceObject.unit_amount / 100,
-      priceId: priceObject.id,
-      description: product.description,
-      imgUrl: product.images[0],
-      categoryId: product.metadata.categoryId,
-      Category: category,
-      stock: product.metadata.stock,
-      createdAt: product.created,
-      updatedAt: product.created,
-    };
-    return sendProduct;
-  } catch (error) {
-    console.error('Error deactivating prices:', error);
-    throw error;
-  }
-};
-
-const convertImgUrl = (imgUrl) => {
-  return `http://localhost:5000/${imgUrl.replace(/\\/g, '/')}`;
-};
 
 // Create new Product by admin
 const createProduct = async (req, res) => {
@@ -320,7 +238,12 @@ const createProduct = async (req, res) => {
 
     //create the price for the product
     const priceObject = await createNewPrice(newProduct.id, price);
-    const sendProduct = transFormProject(newProduct, categoryId, priceObject);
+    const sendProduct = transFormProject(
+      product.id,
+      newProduct,
+      categoryId,
+      priceObject,
+    );
 
     // Return success response
     res.status(201).send(sendProduct);
@@ -341,40 +264,37 @@ const getAllProducts = async (req, res) => {
 
     const sendProducts = [];
     for (const product of products.data) {
-      const priceObject = await getPrice(product.id);
-
-      const category = await Category.findByPk(product.metadata.categoryId);
-
-      const sendProduct = transFormProject(product, category, priceObject);
-
-      sendProducts.push(sendProduct);
+      const getSendProduct = await transFormSendProduct(product.id);
+      if (getSendProduct) {
+        sendProducts.push(getSendProduct);
+      }
     }
 
     return res.status(200).send(sendProducts);
   } catch (error) {
-    console.log(error.message);
+    console.log('here', error.message);
     return res.status(500).send({ error: error.message });
   }
 };
 
 // get Product by Id
-const getProduct = async (req, res) => {
-  try {
-    const product = await stripe.products.retrieve(req.params.id);
+// const getProduct = async (req, res) => {
+//   try {
+//     const product = await stripe.products.retrieve(req.params.id);
 
-    // If product not found, send error message
-    if (!product) {
-      return res.status(404).send({ msg: 'Product not found' });
-    }
+//     // If product not found, send error message
+//     if (!product) {
+//       return res.status(404).send({ msg: 'Product not found' });
+//     }
 
-    return res.status(200).send(product);
-  } catch (errors) {
-    console.log(errors);
-    return res.status(500).send({
-      msg: errors.message,
-    });
-  }
-};
+//     return res.status(200).send(product);
+//   } catch (errors) {
+//     console.log(errors);
+//     return res.status(500).send({
+//       msg: errors.message,
+//     });
+//   }
+// };
 
 // update Product by admin
 const updateProduct = async (req, res) => {
@@ -422,7 +342,12 @@ const updateProduct = async (req, res) => {
 
     const priceObject = await updateProductPrice(req.params.id, priceId, price);
 
-    const sendProduct = transFormProject(newProduct, categoryId, priceObject);
+    const sendProduct = transFormProject(
+      product.id,
+      newProduct,
+      categoryId,
+      priceObject,
+    );
 
     // Return success response
     res.status(200).send(sendProduct);
@@ -487,7 +412,7 @@ const deleteProduct = async (req, res) => {
 
 module.exports = {
   getAllProducts,
-  getProduct,
+  // getProduct,
   createProduct,
   updateProduct,
   deleteProduct,

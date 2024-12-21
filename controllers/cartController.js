@@ -2,6 +2,21 @@ const Cart = require('../models/Cart');
 const CartItem = require('../models/CartItem');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const { transFormSendProduct } = require('../services/prodcutService');
+
+const sendTransCartItems = async (CartItems) => {
+  const sendCartItems = [];
+
+  for (const item of CartItems) {
+    const product = await transFormSendProduct(item.Product.stripe_product_id);
+
+    const ChangedCartItem = { ...item.dataValues, Product: product };
+
+    sendCartItems.push(ChangedCartItem);
+  }
+
+  return sendCartItems;
+};
 
 // Create or update cart item
 const addProductTocart = async (req, res) => {
@@ -71,7 +86,10 @@ const addProductTocart = async (req, res) => {
         error: 'Cart not found',
       });
     }
-    return res.status(200).send(newcart.CartItems);
+
+    const sendCartItems = sendTransCartItems(newcart.CartItems);
+
+    return res.status(200).send(sendCartItems);
   } catch (errors) {
     return res.status(500).send({
       msg: 'server error',
@@ -109,7 +127,10 @@ const getCart = async (req, res) => {
         error: 'Cart not found',
       });
     }
-    return res.status(200).send(cart.CartItems);
+
+    const sendCartItems = await sendTransCartItems(cart.CartItems);
+
+    return res.status(200).send(sendCartItems);
   } catch (errors) {
     res.status(500).send({ msg: 'server error', error: errors.message });
   }
@@ -167,7 +188,9 @@ const updateProudctInfoInCart = async (req, res) => {
       ],
     });
 
-    return res.status(201).send(updateCart.CartItems);
+    const sendCartItems = sendTransCartItems(updateCart.CartItems);
+
+    return res.status(200).send(sendCartItems);
   } catch (error) {
     return res.status(500).send({ msg: error });
   }
@@ -261,7 +284,17 @@ const getAllCartInfo = async (req, res) => {
       });
     }
 
-    return res.status(200).send(cart);
+    const sendCart = [];
+    for (const item of cart) {
+      const sendCartItems = await sendTransCartItems(item.CartItems);
+
+      const changedCartItems = { ...item.dataValues, CartItems: sendCartItems };
+
+      console.log('send cart Items => ', changedCartItems.CartItems);
+      sendCart.push(changedCartItems);
+    }
+
+    return res.status(200).send(sendCart);
   } catch (errors) {
     res.status(500).send({ msg: 'server error', error: errors.message });
   }
@@ -293,7 +326,10 @@ const getCartInfoById = async (req, res) => {
         error: 'Cart not found',
       });
     }
-    return res.status(200).send(cart.CartItems);
+    const sendCartItems = sendTransCartItems(cart.CartItems);
+    console.log('send cart Items =>', sendCartItems);
+
+    return res.status(200).send({ cartItems: sendCartItems });
   } catch (errors) {
     res.status(500).send({ msg: 'server error', error: errors.message });
   }
