@@ -1,9 +1,9 @@
-const orderService = require("../services/orderService");
+const orderService = require('../services/orderService');
 
 // Route to create an order from the cart
 const createOrderFromCart = async (req, res) => {
   const userId = req.user.id;
-  console.log("userId", userId);
+  console.log('userId', userId);
   try {
     const order = await orderService.createOrderFromCart(userId);
     return res.status(201).send(order);
@@ -16,8 +16,20 @@ const getOrders = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const orders = await orderService.getOrders(userId);
+    const orders = await orderService.getUserOrders(userId);
     return res.status(200).send(orders);
+  } catch (error) {
+    return res.status(500).send({ error: error.message });
+  }
+};
+
+const getOrderBySessionId = async (req, res) => {
+  try {
+    const sessionId = req.params.session_id;
+
+    const order = await orderService.getOrderBySessionIdService(sessionId);
+
+    return res.status(200).send(order);
   } catch (error) {
     return res.status(500).send({ error: error.message });
   }
@@ -33,4 +45,9 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-module.exports = { getAllOrders, getOrders, createOrderFromCart };
+module.exports = {
+  getAllOrders,
+  getOrders,
+  createOrderFromCart,
+  getOrderBySessionId,
+};

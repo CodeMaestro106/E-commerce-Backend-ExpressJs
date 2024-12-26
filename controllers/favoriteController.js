@@ -20,10 +20,8 @@ const getFavorite = async (req, res) => {
     const sendProducts = [];
 
     for (const item of favorites) {
-      console.log(item.Product.stripe_product_id);
-      const product = await transFormSendProduct(
-        item.Product.stripe_product_id,
-      );
+      console.log(item.Product.stripeProductId);
+      const product = await transFormSendProduct(item.Product.stripeProductId);
       sendProducts.push(product);
     }
 
@@ -66,9 +64,9 @@ const addProductToFavorite = async (req, res) => {
     // Return success response
 
     const product = await Product.findByPk(productId);
-    const stripe_product_id = product.stripe_product_id;
+    const stripeProductId = product.stripeProductId;
 
-    const sendStripeProduct = await transFormSendProduct(stripe_product_id);
+    const sendStripeProduct = await transFormSendProduct(stripeProductId);
 
     res.status(201).send(sendStripeProduct);
   } catch (error) {

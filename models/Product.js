@@ -6,7 +6,7 @@ class Product extends Model {}
 
 Product.init(
   {
-    stripe_product_id: {
+    stripeProductId: {
       type: DataTypes.STRING,
       allowNull: false,
     },

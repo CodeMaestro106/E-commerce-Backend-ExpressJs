@@ -1,7 +1,7 @@
-const { DataTypes, Model } = require("sequelize");
-const { sequelize } = require("../config/database");
-const Order = require("./Order");
-const Product = require("./Product");
+const { DataTypes, Model } = require('sequelize');
+const { sequelize } = require('../config/database');
+const Order = require('./Order');
+const Product = require('./Product');
 
 class OrderItem extends Model {}
 
@@ -12,15 +12,19 @@ OrderItem.init(
       allowNull: false,
       references: {
         model: Order,
-        key: "id",
+        key: 'id',
       },
+    },
+    stripeProductId: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
     productId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: Product,
-        key: "id",
+        key: 'id',
       },
     },
     quantity: {
@@ -34,16 +38,16 @@ OrderItem.init(
   },
   {
     sequelize,
-    modelName: "OrderItem",
-    tableName: "order_item", // Optional: You can specify the table name
+    modelName: 'OrderItem',
+    tableName: 'order_item', // Optional: You can specify the table name
     timestamps: true, // Sequelize will automatically manage createdAt and updatedAt
-  }
+  },
 );
 
-Order.hasMany(OrderItem, { foreignKey: "orderId" });
-OrderItem.belongsTo(Order, { foreignKey: "orderId" });
+Order.hasMany(OrderItem, { foreignKey: 'orderId' });
+OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
 
-Product.hasMany(OrderItem, { foreignKey: "productId" });
-OrderItem.belongsTo(Product, { foreignKey: "productId" });
+Product.hasMany(OrderItem, { foreignKey: 'productId' });
+OrderItem.belongsTo(Product, { foreignKey: 'productId' });
 
 module.exports = OrderItem;

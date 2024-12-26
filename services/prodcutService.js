@@ -4,17 +4,17 @@ const Product = require('../models/Product');
 
 const { getPrice } = require('../services/priceService');
 
-const transFormSendProduct = async (stripe_product_id) => {
+const transFormSendProduct = async (stripeProductId) => {
   try {
-    const priceObject = await getPrice(stripe_product_id);
+    const priceObject = await getPrice(stripeProductId);
 
-    const product = await stripe.products.retrieve(stripe_product_id);
+    const product = await stripe.products.retrieve(stripeProductId);
 
     const category = await Category.findByPk(product.metadata.categoryId);
 
     const databaseProduct = await Product.findOne({
       where: {
-        stripe_product_id: stripe_product_id,
+        stripeProductId: stripeProductId,
       },
     });
 
@@ -29,8 +29,8 @@ const transFormSendProduct = async (stripe_product_id) => {
       return sendProduct;
     } else {
       console.warn(
-        'No product found in database for stripe_product_id:',
-        stripe_product_id,
+        'No product found in database for stripeProductId:',
+        stripeProductId,
       );
       return null; // Or handle the case where the product is not found
     }
@@ -44,14 +44,14 @@ const transFormProject = (id, product, category, priceObject) => {
   try {
     const sendProduct = {
       id: id,
-      stripe_product_id: product.id,
+      stripeProductId: product.id,
       name: product.name,
       price: priceObject.unit_amount / 100,
       priceId: priceObject.id,
       description: product.description,
       imgUrl: product.images[0],
       categoryId: product.metadata.categoryId,
-      Category: category,
+      category: category.name,
       stock: product.metadata.stock,
       createdAt: product.created,
       updatedAt: product.created,

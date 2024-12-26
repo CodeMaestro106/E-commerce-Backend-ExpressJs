@@ -8,7 +8,7 @@ const sendTransCartItems = async (CartItems) => {
   const sendCartItems = [];
 
   for (const item of CartItems) {
-    const product = await transFormSendProduct(item.Product.stripe_product_id);
+    const product = await transFormSendProduct(item.Product.stripeProductId);
 
     const ChangedCartItem = { ...item.dataValues, Product: product };
 
@@ -87,7 +87,9 @@ const addProductTocart = async (req, res) => {
       });
     }
 
-    const sendCartItems = sendTransCartItems(newcart.CartItems);
+    const sendCartItems = await sendTransCartItems(newcart.CartItems);
+
+    console.log('add item in cart =>', sendCartItems);
 
     return res.status(200).send(sendCartItems);
   } catch (errors) {
@@ -124,7 +126,7 @@ const getCart = async (req, res) => {
     // check cart exist already.
     if (!cart) {
       return res.status(404).send({
-        error: 'Cart not found',
+        msg: 'Cart not found',
       });
     }
 
