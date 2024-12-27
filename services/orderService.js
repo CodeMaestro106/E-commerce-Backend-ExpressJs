@@ -6,6 +6,7 @@ const Product = require('../models/Product');
 const { FLOAT } = require('sequelize');
 
 const { transFormSendProduct } = require('../services/prodcutService');
+const User = require('../models/User');
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -25,7 +26,23 @@ const sendTransOrderItems = async (orderItems) => {
 
 // Fetch all orders
 const getAllOrders = async () => {
-  return await Order.findAll();
+  const orders = await Order.findAll({
+    include: [
+      {
+        model: User,
+        attributes: ['username'],
+      },
+    ],
+  });
+
+  const transFormOrder = orders.map((order) => {
+    const transFormOrder = { ...order.toJSON(), username: order.User.username };
+    delete transFormOrder.User;
+
+    return transFormOrder;
+  });
+
+  return transFormOrder;
 };
 
 // get orders by userId

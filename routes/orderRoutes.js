@@ -11,17 +11,16 @@ const {
   getAllOrders,
 } = require('../controllers/orderController');
 
+// Get all orders by Admin
+router
+  .route('/all')
+  .get(authenticate, authorize([config.roles.admin]), getAllOrders);
+
+router.get('/:session_id', getOrderBySessionId);
 // Create an order from cart
 router
   .route('/')
   .get(authenticate, getOrders)
   .post(authenticate, createOrderFromCart);
-
-router.get('/:session_id', getOrderBySessionId);
-
-// Get all orders by Admin
-router
-  .route('/all')
-  .get(authenticate, authorize([config.roles.admin]), getAllOrders);
 
 module.exports = router;

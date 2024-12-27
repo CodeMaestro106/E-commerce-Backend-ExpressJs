@@ -292,7 +292,6 @@ const getAllCartInfo = async (req, res) => {
 
       const changedCartItems = { ...item.dataValues, CartItems: sendCartItems };
 
-      console.log('send cart Items => ', changedCartItems.CartItems);
       sendCart.push(changedCartItems);
     }
 

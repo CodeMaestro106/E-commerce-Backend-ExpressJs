@@ -13,6 +13,7 @@ const createOrderFromCart = async (req, res) => {
 };
 
 const getOrders = async (req, res) => {
+  console.log('get orders');
   const userId = req.user.id;
 
   try {
@@ -25,6 +26,7 @@ const getOrders = async (req, res) => {
 
 const getOrderBySessionId = async (req, res) => {
   try {
+    console.log('get session Id');
     const sessionId = req.params.session_id;
 
     const order = await orderService.getOrderBySessionIdService(sessionId);
@@ -38,7 +40,9 @@ const getOrderBySessionId = async (req, res) => {
 // Get All order
 const getAllOrders = async (req, res) => {
   try {
+    console.log('get all order');
     const orders = await orderService.getAllOrders();
+
     return res.status(200).send(orders);
   } catch (error) {
     return res.status(500).json({ error: error.message });
